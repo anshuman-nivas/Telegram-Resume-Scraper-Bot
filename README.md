@@ -232,7 +232,7 @@ System handles:
 ```
 ResumeBot/
 │
-├── userbot.exe
+├── ResumeBot.exe
 ├── .env
 ├── credentials.json
 │
