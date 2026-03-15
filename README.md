@@ -3,13 +3,13 @@
 
 # 📄 TELEGRAM RESUME SCRAPER BOT
 
-## Intelligent Resume Extraction & Processing System
+### Intelligent Resume Extraction & Processing System
 
 ---
 
 ## 📌 Overview
 
-This system is an automated **Telegram Resume Collection Bot** designed to:
+This system is an **Automated Telegram Resume Collection & Processing Bot** designed to:
 
 * Monitor multiple Telegram job/resume groups
 * Extract resumes from PDF / DOCX / Images
@@ -19,7 +19,15 @@ This system is an automated **Telegram Resume Collection Bot** designed to:
 * Automatically email resumes received today
 * Maintain processing state & sync with Google Sheets
 
-This is a **fully automated production-grade pipeline** built for recruitment automation.
+The system operates as a **fully autonomous pipeline**, requiring minimal manual intervention once deployed.
+
+Built to streamline recruitment workflows. It is suitable for:
+
+* Recruitment agencies
+* HR automation pipelines
+* Talent acquisition teams
+* Startup hiring automation
+* Resume pooling systems
 
 ---
 
@@ -46,7 +54,7 @@ This is a **fully automated production-grade pipeline** built for recruitment au
                              ▼
                 ┌──────────────────────────┐
                 │ Docker OCR Service       │
-                │ (PaddleOCR)              │
+                │ (PaddleOCR Engine)       │
                 └────────────┬─────────────┘
                              │
                              ▼
@@ -58,26 +66,30 @@ This is a **fully automated production-grade pipeline** built for recruitment au
                              │
                              ▼
                 ┌──────────────────────────┐
-                │ Identity Manager         │
-                │ - Email/Phone Dedup      │
+                │ Identity Dedup System    |
+                │ - Email/Phone Dedup      |
                 └────────────┬─────────────┘
                              │
                              ▼
          ┌──────────────────────────────────────┐
-         │  Storage + Email Automation + State  │
+         │ Storage + Email + State Persistence  │
          └──────────────────────────────────────┘
 ```
 
 ---
 
-## ⚙️ Key Features
+## ⚙️ Core Functionalities
 
 ### 📥 Telegram Monitoring
 
-* Auto joins groups from Google Sheet
-* Monitors both historical + live messages
-* Handles flood waits intelligently
-* Private + public group support
+* Automatically joins Telegram groups from Google Sheet
+* Supports both public and private invite links
+* Fetches historical messages
+* Listens to real-time incoming resumes
+* Handles Telegram flood waits safely
+* Crash-safe incremental scanning
+
+---
 
 ### 📄 Resume Extraction
 
@@ -85,147 +97,202 @@ Supports:
 
 * PDF resumes
 * DOCX resumes
-* Image resumes (via OCR)
+* Image resumes (.jpg / .jpeg / .png)
 
-### 🤖 OCR Microservice
+Image resumes processed via OCR microservice.
 
-* Dockerized PaddleOCR engine
-* CPU optimized
+---
+
+### 🤖 OCR Microservice (Dockerized PaddleOCR)
+
+* PaddleOCR based extraction
+* CPU optimized inference
 * API based architecture
-* Scalable & replaceable
+* Fully isolated dependency environment
+* Replaceable with GPU OCR in future
+
+---
 
 ### 🧠 Intelligent Resume Classification
 
-Uses:
+Resume detection is done using:
 
-* Fuzzy keyword matching
+* Rule-based keyword detection
 * Resume section scoring
-* JD detection scoring
-* OCR noise correction
+* JD signal detection
+* Fuzzy matching to handle OCR noise
+* Email + Phone presence scoring
 
-### 🧍 Identity Deduplication
+No LLM used → extremely fast processing.
 
-Based on:
+---
+
+### 🧍 Identity-Based Deduplication
+
+Candidate deduplication performed using:
 
 * Email
-* Phone
-* Email + Phone combined key
+* Phone number
+* Email + Phone combined identity key
 
-Automatically replaces older resume.
+If duplicate found → newer resume replaces older.
+
+Works across:
+
+* Multiple groups
+* Multiple formats
+* Historical + live messages
+
+---
 
 ### 📧 Smart Email Automation
 
-* Only **today’s resumes are emailed**
-* Historical resumes are only stored
-* Email failure → resume not counted processed
+* Only **today’s resumes are emailed automatically**
+* Historical resumes are pooled locally
+* Email failure → resume NOT marked processed
+* Ensures no resume loss
 
-### 📊 Google Sheets Sync
+---
+
+### 📊 Google Sheets Synchronization
 
 Tracks per group:
 
 * Last scanned message ID
+* Last scan timestamp
 * Total resumes fetched
 * Total processed documents
-* Join status
+* Group join status
 
-### 🧾 Runtime Persistence
+Acts as operational dashboard.
+
+---
+
+### 🧾 Persistent Runtime State
 
 Maintains:
 
-* Seen file hashes
+* Resume hash database
 * Candidate identity store
-* Bot scanning cursor
+* Group scanning cursor
 * Processing counters
 
-Bot is **restart safe**.
+System is:
+
+✔ Restart safe
+✔ Crash safe
+✔ Network failure safe
+
+---
+
+### 📁 Resume Storage Architecture
+
+Resumes stored as:
+
+```
+resumes/
+   group_name/
+       username_resumeCount_originalName.pdf
+```
+
+Where username is derived from email prefix.
+
+Ensures:
+
+* Unique naming
+* Candidate grouping
+* Clean recruiter pool
+
+---
+
+### 📜 Automated Log Management
+
+* Rotating log system
+* Max size: 5 MB per file
+* Maintains last 5 logs
+* Prevents disk overflow
+
+---
+
+### 🧩 Failure Recovery Design
+
+System handles:
+
+* OCR failure
+* Network disconnection
+* Telegram rate limits
+* Email failure
+* Partial processing crash
+* Duplicate processing prevention
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Resume Bot/
+ResumeBot/
 │
-├── ResumeBot.exe
+├── userbot.exe
 ├── .env
 ├── credentials.json
 │
-├── runtime_state.json
-├── identity_store.json
-├── seen_resume_hashes.json
+├── state/
+│   ├── runtime_state.json
+│   ├── identity_store.json
+│   ├── seen_resume_hashes.json
 │
-├── resumes/
 ├── logs/
-└── temp/
+├── resumes/
+├── temp/
 ```
 
 ---
 
-## 🔑 Required Credentials Setup
+## 🔑 Credentials Setup
 
-### 1️⃣ Telegram API Credentials
+### 1️⃣ Telegram API
 
-Go to:
+Visit:
 
-👉 [https://my.telegram.org](https://my.telegram.org)
+https://my.telegram.org
 
 Steps:
 
-1. Login using phone number
-2. Go to **API Development Tools**
-3. Create app
-4. Copy:
-
-* API_ID
-* API_HASH
+* Login using phone
+* Open API Development Tools
+* Create application
+* Copy API_ID and API_HASH
 
 ---
 
 ### 2️⃣ Google Sheets Service Account
 
-Steps:
-
-1. Go to Google Cloud Console
-2. Create new project
-3. Enable:
-
-```
-Google Sheets API
-```
-
-4. Create **Service Account**
-5. Download JSON → rename to:
+* Open Google Cloud Console
+* Create project
+* Enable Google Sheets API
+* Create Service Account
+* Download JSON → rename to:
 
 ```
 credentials.json
 ```
 
-6. Share sheet with service account email.
+Share your sheet with service account email.
 
-7. In case of any confusion refer this -> "https://youtu.be/zCEJurLGFRk?si=TX_rFLGqmjA65TDQ"
 ---
 
-### 3️⃣ Email Credentials
+### 3️⃣ Email Setup
 
 Use:
 
-* Gmail / SMTP server
-
-Enable:
-
-* App password (NOT real password)
+* Gmail App Password
+* NOT normal password
 
 ---
 
 ### 4️⃣ OCR Service (Docker)
 
-Install:
-
-```
-Docker Desktop
-```
-
-Then run:
+Start OCR service:
 
 ```
 docker run -p 8001:8001 ocr_service
@@ -233,23 +300,21 @@ docker run -p 8001:8001 ocr_service
 
 ---
 
-## 🧾 .env Configuration
-
-Example:
+## 🧾 .env Example
 
 ```
-API_ID=xxxxx
-API_HASH=xxxxx
-PHONE=+91xxxxxxxx
+API_ID=
+API_HASH=
+PHONE=
 
-EMAIL_SENDER=xxx@gmail.com
-EMAIL_PASSWORD=app_password
-EMAIL_RECEIVER=xxx@gmail.com
+EMAIL_SENDER=
+EMAIL_PASSWORD=
+EMAIL_RECEIVER=
 
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=465
 
-GOOGLE_SHEETS_ID=xxxx
+GOOGLE_SHEETS_ID=
 GOOGLE_SHEETS_WORKSHEET_NAME=Sheet1
 GOOGLE_SHEETS_CREDENTIALS_PATH=credentials.json
 
@@ -258,107 +323,76 @@ OCR_API_URL=http://localhost:8001/ocr
 
 ---
 
-## ▶️ How To Run
+## ▶️ Running The System
 
-### Step 1 — Start OCR Service
+### 🔹 Option 1 — Run via Python
 
 ```
-docker run -p 8001:8001 ocr_service
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python userbot.py
 ```
 
-### Step 2 — Run Bot
+---
+
+### 🔹 Option 2 — Build EXE
+
+```
+pyinstaller --noconfirm --onefile --console --name ResumeBot ^
+--add-data ".env;." ^
+--add-data "credentials.json;." ^
+--hidden-import telethon.sync ^
+--hidden-import rapidfuzz ^
+--hidden-import fitz ^
+--hidden-import docx ^
+--hidden-import gspread ^
+--hidden-import google.oauth2 ^
+userbot.py
+```
+
+Then run:
 
 ```
 ResumeBot.exe
 ```
 
-First run:
+---
 
-* Telegram login OTP required
+### ⚠️ Important Operational Notes
+
+* Always start OCR container before bot
+* Do not edit runtime state files manually
+* First run requires Telegram OTP login
+* Do not move resumes folder while bot running
+* Email failures do not increment processed counter
+* Duplicate resumes automatically replaced
 
 ---
 
-## ⚠️ Important Operational Notes
+## 🔐 Security
 
-### ✔ Always start OCR service before bot
-
-### ✔ Do NOT edit runtime JSON files manually
-
-### ✔ Do NOT move resumes folder while bot running
-
-### ✔ Bot uses incremental scanning
-
-### ✔ Restart safe
-
-### ✔ Email failures do NOT mark resume processed
-
-### ✔ Duplicate resumes auto replaced
-
-### ✔ OCR noise automatically corrected
+* All credentials stored locally
+* No external resume storage
+* Controlled Google Sheet access
+* OCR runs locally
 
 ---
 
-## 📊 Resume Classification Logic
+## 📈 Scalability
 
-Resume score based on:
+System can scale using:
 
-* Contact info presence
-* Resume section detection
-* Fuzzy keyword matching
-
-JD score based on:
-
-* Hiring language detection
-* Salary / vacancy signals
-
-Decision:
-
-```
-If JD > Resume → Ignore
-If Resume < threshold → Ignore
-Else → Save
-```
-
----
-
-## 🔐 Security Considerations
-
-* Credentials stored locally only
-* No external data storage
-* No resume sharing except configured email
-* Google sheet access limited via service account
-
----
-
-## 🧩 Failure Recovery Design
-
-Bot supports:
-
-* Crash safe restart
-* Duplicate prevention
-* Partial processing recovery
-* Sheet state reconstruction
-* Atomic file writes
-
----
-
-## 📈 Scalability Design
-
-System can scale by:
-
-* Replacing OCR container with GPU version
-* Adding Redis queue
+* GPU OCR container
+* Queue system (Redis / Kafka)
 * Cloud deployment
-* Multi-bot sharding
-* Async email workers
+* Multi-bot architecture
 
 ---
 
-## 🛠 Support
+## 🛠 Troubleshooting
 
-If system stops:
-
-Check:
+Check logs:
 
 ```
 logs/bot.log
@@ -366,9 +400,15 @@ logs/bot.log
 
 Common issues:
 
-* OCR not running
-* Sheet permission missing
+* OCR container not running
+* Google Sheet permissions missing
 * Telegram flood wait
-* Email auth failure
+* Email authentication failure
 
 ---
+
+## 📞 Support
+
+For deployment support or customization:
+Contact Me.
+LinkedIn : [https://www.linkedin.com/in/anshuman-nivas-b195a9253/]
