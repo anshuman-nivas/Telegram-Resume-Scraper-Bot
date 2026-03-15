@@ -151,6 +151,10 @@ class ResumeProcessor:
             if isinstance(text, list):
                 text = "\n".join(text)
 
+            if not text or len(text.strip()) < 10:
+                self._ignore("Empty OCR text", filename)
+                return True
+
             logger.info(f"Extracted text length: {len(text)}")
 
             preview = text[:500].replace("\n", " ")
@@ -184,7 +188,12 @@ class ResumeProcessor:
             )
             os.makedirs(group_dir, exist_ok=True)
 
-            final_path = os.path.join(group_dir, filename)
+            resume_index = self.state_manager.state.get("total_processed", 0)
+            identity_key = identity.split("|")[0] if identity else "unknown"
+            if "@" in identity_key:
+                identity_key = identity_key.split("@")[0]
+            final_filename = f"{identity_key}_{resume_index}_{filename}"
+            final_path = os.path.join(group_dir, final_filename)
 
             if identity and self.identity_manager.exists(identity):
 
