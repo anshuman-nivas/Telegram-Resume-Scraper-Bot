@@ -65,8 +65,12 @@ class DocumentAnalyzer:
                         continue
 
                     text = data.get("text", "")
-                    logger.info(f"OCR text length: {len(text)}")
 
+                    if not text or len(text.strip()) < 10:
+                        logger.warning("OCR returned empty or unusable text")
+                        return "", 1
+
+                    logger.info(f"OCR text length: {len(text)}")
                     return text.lower(), 1
 
                 except Exception as e:
